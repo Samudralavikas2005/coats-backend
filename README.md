@@ -44,40 +44,32 @@ coats-backend/
 
 ## Setup Instructions (After Cloning)
 
-Clone the repository and enter the project directory:
-
+**Clone the repository and enter the project directory:**
 git clone https://github.com/Samudralavikas2005/coats-backend.git 
 cd coats-backend 
 
-Create and activate a virtual environment:
-
+**Create and activate a virtual environment:**
 python3 -m venv venv 
 source venv/bin/activate 
 
-Install required Python packages:
-
+**Install required Python packages:**
 pip install -r requirements.txt 
 
-Make sure PostgreSQL is installed and running:
-
+**Make sure PostgreSQL is installed and running:**
 sudo systemctl start postgresql 
 
-Create database and database user:
-
+**Create database and database user:**
 sudo -i -u postgres 
 psql 
-
 CREATE DATABASE coats_db; 
 CREATE USER coats_user WITH PASSWORD 'password'; 
 GRANT ALL PRIVILEGES ON DATABASE coats_db TO coats_user; 
 
-Exit PostgreSQL:
-
+**Exit PostgreSQL:**
 \q 
 exit 
 
-Configure database in `coats/settings.py`:
-
+**Configure database in `coats/settings.py`:**
 DATABASES = { 
     'default': {  
         'ENGINE': 'django.db.backends.postgresql',  
@@ -89,39 +81,31 @@ DATABASES = {
     }  
 } 
 
-Apply migrations:
-
+**Apply migrations:**
 python manage.py makemigrations 
 python manage.py migrate 
 
-Create admin (supervisor) user:
-
+**Create admin (supervisor) user:**
 python manage.py createsuperuser 
 
-Run the development server:
-
+**Run the development server:**
 python manage.py runserver 
 
-Access admin panel:
-
+**Access admin panel:**
 http://127.0.0.1:8000/admin 
 
 ---
 
 ## JWT Authentication Usage
 
-Obtain JWT token (login):
-
+**Obtain JWT token (login):**
 curl -X POST http://127.0.0.1:8000/api/token/ \
 -H "Content-Type: application/json" \
 -d '{"username":"officer1","password":"officer1"}'
 
-Use the access token for API requests:
-
+**Use the access token for API requests:**
 Authorization: Bearer <ACCESS_TOKEN>
-
 Example – view cases:
-
 curl -X GET http://127.0.0.1:8000/api/cases/ \
 -H "Authorization: Bearer <ACCESS_TOKEN>"
 
