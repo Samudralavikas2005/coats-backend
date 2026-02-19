@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import CreateCase from "./CreateCase";
+import { useNavigate } from "react-router-dom";
+
 
 function Cases() {
   const [cases, setCases] = useState([]);
   const [error, setError] = useState("");
   const role = localStorage.getItem("role");
+  const navigate = useNavigate();
+
 
   // Logout function (JWT logout = delete tokens)
   const handleLogout = () => {
@@ -53,7 +56,11 @@ function Cases() {
       </button>
 
       {/* Create Case Form */}
-      {role === "CASE" && <CreateCase onCreated={fetchCases} />}
+      {role === "CASE" && (
+        <button onClick={() => navigate("/create-case")}>
+          Create New Case
+        </button>
+      )}
 
 
       <h2>My Cases</h2>

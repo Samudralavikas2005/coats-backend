@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CreateCase({ onCreated }) {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ function CreateCase({ onCreated }) {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -64,7 +66,8 @@ function CreateCase({ onCreated }) {
       });
 
       // tell parent to refresh cases
-      if (onCreated) onCreated();
+      navigate("/cases");
+
 
     } catch (err) {
       setError(err.message);
