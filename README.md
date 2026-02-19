@@ -46,7 +46,7 @@ coats-backend/
 
 Clone the repository and enter the project directory:
 
-git clone https://github.com/YOUR_USERNAME/coats-backend.git 
+git clone https://github.com/Samudralavikas2005/coats-backend.git 
 cd coats-backend 
 
 Create and activate a virtual environment:
