@@ -1,16 +1,15 @@
 from rest_framework.permissions import BasePermission
 
-class IsSupervisor(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated
-            and request.user.role == 'SUPERVISOR'
-        )
+class IsCaseOwner(BasePermission):
+    """
+    Allows updates only by the case holding officer.
+    Supervisors can READ.
+    """
 
+    def has_object_permission(self, request, view, obj):
+        # SAFE METHODS → allow read
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return True
 
-class IsCaseOfficer(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated
-            and request.user.role == 'CASE'
-        )
+        # WRITE → only case officer
+        return obj.case_holding_officer == request.user
