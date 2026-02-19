@@ -1,11 +1,8 @@
-
-# Create your views here.
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from .models import Case
 from .serializers import CaseSerializer
-from .permissions import IsSupervisor, IsCaseOfficer
 
 class CaseListCreateView(generics.ListCreateAPIView):
     serializer_class = CaseSerializer
@@ -22,7 +19,7 @@ class CaseListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         user = self.request.user
 
-        # ❌ Supervisors cannot create cases
+        # Only Case Handling Officers can create cases
         if user.role != 'CASE':
             raise PermissionDenied("Only Case Officers can create cases.")
 
@@ -30,10 +27,3 @@ class CaseListCreateView(generics.ListCreateAPIView):
             case_holding_officer=user,
             branch=user.branch
         )
-    
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsSupervisor()]
-        return [IsAuthenticated()]
-
-
