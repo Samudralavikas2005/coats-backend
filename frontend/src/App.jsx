@@ -2,29 +2,22 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Cases from "./pages/Cases";
 import CreateCase from "./pages/CreateCase";
+import CaseDetail from "./pages/CaseDetail";
+import SupervisorDashboard from "./pages/SupervisorDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const token = localStorage.getItem("access");
-  const role = localStorage.getItem("role");
-
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Default route */}
-        <Route
-          path="/"
-          element={token ? <Navigate to="/cases" /> : <Navigate to="/login" />}
-        />
+        {/* Default */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* Login */}
-        <Route
-          path="/login"
-          element={token ? <Navigate to="/cases" /> : <Login />}
-        />
+        <Route path="/login" element={<Login />} />
 
-        {/* Cases (protected) */}
+        {/* Officer routes */}
         <Route
           path="/cases"
           element={
@@ -34,15 +27,36 @@ function App() {
           }
         />
 
-        {/* Create Case (only for officers) */}
+        <Route
+          path="/cases/:id"
+          element={
+            <ProtectedRoute>
+              <CaseDetail />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/create-case"
           element={
             <ProtectedRoute>
-              {role === "CASE" ? <CreateCase /> : <Navigate to="/cases" />}
+              <CreateCase />
             </ProtectedRoute>
           }
         />
+
+        {/* Supervisor */}
+        <Route
+          path="/supervisor"
+          element={
+            <ProtectedRoute>
+              <SupervisorDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
     </BrowserRouter>
@@ -50,4 +64,3 @@ function App() {
 }
 
 export default App;
-

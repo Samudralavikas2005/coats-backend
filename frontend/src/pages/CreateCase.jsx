@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function CreateCase({ onCreated }) {
-  const [formData, setFormData] = useState({
+function CreateCase() {
+  const navigate = useNavigate();
+  const branch = localStorage.getItem("branch"); // officer branch (read-only)
+
+  const [form, setForm] = useState({
     ps_limit: "",
     crime_number: "",
     section_of_law: "",
@@ -11,27 +14,24 @@ function CreateCase({ onCreated }) {
     complainant_name: "",
     accused_details: "",
     gist_of_case: "",
-    current_stage: "",
     action_to_be_taken: "",
   });
 
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     const token = localStorage.getItem("access");
+    if (!token) {
+      setError("Not logged in");
+      return;
+    }
 
     try {
       const res = await fetch("http://127.0.0.1:8000/api/cases/", {
@@ -40,66 +40,123 @@ function CreateCase({ onCreated }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...form,
+          current_stage: "UI", // ✅ FORCE default stage
+        }),
       });
+
+      const data = await res.json();
 
       if (!res.ok) {
-        const errData = await res.json();
-        console.error("Backend error:", errData);
-        throw new Error(JSON.stringify(errData));
+        // show backend validation error if any
+        throw new Error(
+          typeof data === "object"
+            ? Object.values(data).flat().join(", ")
+            : "Failed to create case"
+        );
       }
 
-      setSuccess("Case created successfully ✅");
-
-      // reset form
-      setFormData({
-        ps_limit: "",
-        crime_number: "",
-        section_of_law: "",
-        date_of_occurrence: "",
-        date_of_registration: "",
-        complainant_name: "",
-        accused_details: "",
-        gist_of_case: "",
-        current_stage: "",
-        action_to_be_taken: "",
-      });
-
-      // tell parent to refresh cases
       navigate("/cases");
-
-
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div style={{ marginBottom: "30px" }}>
-      <h3>Create New Case</h3>
+    <div className="form-container">
+      <h2>Create New Case</h2>
+
+      {/* Branch shown but NOT editable */}
+      <p>
+        <b>Branch:</b> {branch}
+      </p>
+
+      {error && <p className="error-text">{error}</p>}
 
       <form onSubmit={handleSubmit}>
-        <input name="ps_limit" placeholder="PS Limit" value={formData.ps_limit} onChange={handleChange} required /><br /><br />
-        <input name="crime_number" placeholder="Crime Number" value={formData.crime_number} onChange={handleChange} required /><br /><br />
-        <input name="section_of_law" placeholder="Section of Law" value={formData.section_of_law} onChange={handleChange} required /><br /><br />
+        <input
+          className="form-input"
+          name="ps_limit"
+          placeholder="PS Limit"
+          onChange={handleChange}
+          required
+        />
 
-        <label>Date of Occurrence</label><br />
-        <input type="date" name="date_of_occurrence" value={formData.date_of_occurrence} onChange={handleChange} required /><br /><br />
+        <input
+          className="form-input"
+          name="crime_number"
+          placeholder="Crime Number"
+          onChange={handleChange}
+          required
+        />
 
-        <label>Date of Registration</label><br />
-        <input type="date" name="date_of_registration" value={formData.date_of_registration} onChange={handleChange} required /><br /><br />
+        <input
+          className="form-input"
+          name="section_of_law"
+          placeholder="Section of Law"
+          onChange={handleChange}
+          required
+        />
 
-        <input name="complainant_name" placeholder="Complainant Name" value={formData.complainant_name} onChange={handleChange} required /><br /><br />
-        <input name="accused_details" placeholder="Accused Details" value={formData.accused_details} onChange={handleChange} required /><br /><br />
-        <input name="gist_of_case" placeholder="Gist of Case" value={formData.gist_of_case} onChange={handleChange} required /><br /><br />
-        <input name="current_stage" placeholder="Current Stage" value={formData.current_stage} onChange={handleChange} required /><br /><br />
-        <input name="action_to_be_taken" placeholder="Action to be Taken" value={formData.action_to_be_taken} onChange={handleChange} required /><br /><br />
+        <label>Date of Occurrence</label>
+        <input
+          className="form-input"
+          type="date"
+          name="date_of_occurrence"
+          onChange={handleChange}
+          required
+        />
 
-        <button type="submit">Create Case</button>
+        <label>Date of Registration</label>
+        <input
+          className="form-input"
+          type="date"
+          name="date_of_registration"
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          className="form-input"
+          name="complainant_name"
+          placeholder="Complainant Name"
+          onChange={handleChange}
+        />
+
+        <textarea
+          className="form-input"
+          name="accused_details"
+          placeholder="Accused Details"
+          onChange={handleChange}
+        />
+
+        <textarea
+          className="form-input"
+          name="gist_of_case"
+          placeholder="Gist of Case"
+          onChange={handleChange}
+        />
+
+        {/* Stage shown but locked */}
+        <label>Current Stage</label>
+        <input
+          className="form-input"
+          value="Under Investigation"
+          disabled
+        />
+
+        <textarea
+          className="form-input"
+          name="action_to_be_taken"
+          placeholder="Action to be Taken"
+          onChange={handleChange}
+        />
+
+        <button type="submit" className="submit-btn">
+          Create Case
+        </button>
       </form>
-
-      {success && <p style={{ color: "green" }}>{success}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }

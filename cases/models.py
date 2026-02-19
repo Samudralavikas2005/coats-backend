@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 import uuid
 
-
 class Case(models.Model):
 
     CASE_STAGE_CHOICES = (
@@ -10,13 +9,10 @@ class Case(models.Model):
         ('PT', 'Pending Trial'),
         ('HC', 'Pending before High Court'),
         ('SC', 'Pending before Supreme Court'),
+        ('CC', 'Case Closed'),
     )
 
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     ps_limit = models.CharField(max_length=100)
     crime_number = models.CharField(max_length=100)
@@ -31,7 +27,8 @@ class Case(models.Model):
 
     current_stage = models.CharField(
         max_length=2,
-        choices=CASE_STAGE_CHOICES
+        choices=CASE_STAGE_CHOICES,
+        default="UI"
     )
 
     action_to_be_taken = models.TextField()
@@ -41,11 +38,7 @@ class Case(models.Model):
     case_holding_officer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='cases'
+        related_name="cases"
     )
 
     branch = models.CharField(max_length=10)
-
-    def __str__(self):
-        return f"{self.crime_number} ({self.get_current_stage_display()})"
- 

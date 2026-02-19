@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -11,52 +13,47 @@ function Login() {
     try {
       const res = await fetch("http://127.0.0.1:8000/api/token/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error("Invalid credentials");
 
-      if (!res.ok) {
-        throw new Error("Invalid credentials");
-      }
+      // 🔒 CLEAR OLD SESSION
+      localStorage.clear();
 
-      // Store token
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
-      
-      // Decode role from JWT payload
+
       const payload = JSON.parse(atob(data.access.split(".")[1]));
       localStorage.setItem("role", payload.role);
+      localStorage.setItem("branch", payload.branch);
+      localStorage.setItem("username", payload.username);
 
+      // ✅ REPLACE history (this fixes back button issue)
+      if (payload.role === "SUPERVISOR") {
+        navigate("/supervisor", { replace: true });
+      } else {
+        navigate("/cases", { replace: true });
+      }
 
-      alert("Login successful ✅");
-      window.location.reload();
-      console.log("JWT:", data);
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
+    <div className="container">
       <h2>CoATS Login</h2>
 
       <form onSubmit={handleLogin}>
         <input
-          type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
         />
-        <br /><br />
-
         <input
           type="password"
           placeholder="Password"
@@ -64,12 +61,10 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <br /><br />
-
         <button type="submit">Login</button>
       </form>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="error">{error}</p>}
     </div>
   );
 }
