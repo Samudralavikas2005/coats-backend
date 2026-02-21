@@ -47,7 +47,7 @@ function App() {
 
         {/* Supervisor */}
         <Route
-          path="/supervisor"
+          path="/cases"
           element={
             <ProtectedRoute>
               <SupervisorDashboard />

@@ -33,7 +33,7 @@ function Login() {
 
       // ✅ REPLACE history (this fixes back button issue)
       if (payload.role === "SUPERVISOR") {
-        navigate("/supervisor", { replace: true });
+        navigate("/cases", { replace: true }); 
       } else {
         navigate("/cases", { replace: true });
       }
